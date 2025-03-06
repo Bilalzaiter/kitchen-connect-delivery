@@ -8,6 +8,8 @@ import { AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import Discover from "./pages/Discover";
 import ChefSignup from "./pages/ChefSignup";
+import DriverSignup from "./pages/DriverSignup";
+import DeliveryDashboard from "./pages/DeliveryDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +25,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/chef-signup" element={<ChefSignup />} />
+            <Route path="/driver-signup" element={<DriverSignup />} />
+            <Route path="/delivery-dashboard" element={<DeliveryDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

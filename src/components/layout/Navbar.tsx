@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,14 @@ export function Navbar() {
     { name: 'Become a Chef', path: '/chef-signup', icon: ChefHat },
     { name: 'Deliver with us', path: '/driver-signup', icon: Bike },
   ];
+
+  // Check if we're on a driver page to show delivery dashboard link
+  const isDriverPage = location.pathname === '/driver-signup' || location.pathname === '/delivery-dashboard';
+
+  // If we're on a driver page, add the dashboard link
+  const currentNavLinks = isDriverPage ? 
+    [...navLinks, { name: 'Delivery Dashboard', path: '/delivery-dashboard', icon: MapPin }] : 
+    navLinks;
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -73,7 +82,7 @@ export function Navbar() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
-          {navLinks.map((link) => (
+          {currentNavLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
@@ -131,7 +140,7 @@ export function Navbar() {
             </button>
 
             <div className="flex flex-col space-y-4">
-              {navLinks.map((link) => (
+              {currentNavLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
