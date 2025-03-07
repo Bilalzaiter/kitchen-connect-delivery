@@ -1,11 +1,22 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, MapPin, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 const Hero = () => {
+  const [location, setLocation] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (location.trim()) {
+      navigate(`/discover?location=${encodeURIComponent(location.trim())}`);
+    }
+  };
+
   return (
     <div className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden">
       {/* Background gradient */}
@@ -54,7 +65,7 @@ const Hero = () => {
           </p>
           
           {/* Search bar */}
-          <div className="relative max-w-xl mx-auto mb-12">
+          <form onSubmit={handleSearch} className="relative max-w-xl mx-auto mb-12">
             <div className="flex items-center w-full">
               <div className="relative flex-grow">
                 <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
@@ -62,13 +73,15 @@ const Hero = () => {
                   type="text" 
                   placeholder="Enter your location..." 
                   className="pl-12 pr-4 py-6 rounded-l-full border-r-0 text-base focus-visible:ring-brand-orange focus-visible:ring-2"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                 />
               </div>
-              <Button className="rounded-r-full h-[50px] px-6 bg-brand-orange hover:bg-brand-orange-light">
+              <Button type="submit" className="rounded-r-full h-[50px] px-6 bg-brand-orange hover:bg-brand-orange-light">
                 <Search size={18} className="mr-2" /> Find Food
               </Button>
             </div>
-          </div>
+          </form>
           
           {/* Features */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Star, ChefHat, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DistanceBadge from '../ui/DistanceBadge';
@@ -59,7 +60,9 @@ const ChefCard: React.FC<ChefCardProps> = ({ chef, index }) => {
           <span className="text-sm text-muted-foreground">{chef.dishCount} dishes available</span>
         </div>
         
-        <Button variant="outline" className="w-full">View Menu</Button>
+        <Button variant="outline" className="w-full" asChild>
+          <Link to={`/chef/${chef.id}`}>View Menu</Link>
+        </Button>
       </div>
     </motion.div>
   );
@@ -138,7 +141,9 @@ const FeaturedChefs = () => {
         </div>
         
         <div className="text-center mt-12">
-          <Button className="btn-outline">View All Chefs</Button>
+          <Button className="btn-outline" asChild>
+            <Link to="/chefs">View All Chefs</Link>
+          </Button>
         </div>
       </div>
     </section>

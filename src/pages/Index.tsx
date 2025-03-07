@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Hero from '../components/home/Hero';
 import FeaturedChefs from '../components/home/FeaturedChefs';
@@ -41,8 +42,10 @@ const Index = () => {
 
             {/* We'll add the actual dishes in the discover page */}
             <div className="text-center mt-8">
-              <Button className="btn-primary" size="lg">
-                Explore All Dishes <ArrowRight className="ml-2" size={16} />
+              <Button className="btn-primary" size="lg" asChild>
+                <Link to="/discover">
+                  Explore All Dishes <ArrowRight className="ml-2" size={16} />
+                </Link>
               </Button>
             </div>
           </div>
@@ -63,11 +66,11 @@ const Index = () => {
                   Join KitchenConnect today and discover amazing dishes from talented home chefs in your neighborhood.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                  <Button className="btn-secondary" size="lg">
-                    Sign Up Now
+                  <Button className="btn-secondary" size="lg" asChild>
+                    <Link to="/signup">Sign Up Now</Link>
                   </Button>
-                  <Button className="bg-white/20 hover:bg-white/30 text-white" size="lg">
-                    Learn More
+                  <Button className="bg-white/20 hover:bg-white/30 text-white" size="lg" asChild>
+                    <Link to="/discover">Learn More</Link>
                   </Button>
                 </div>
               </motion.div>
@@ -104,9 +107,9 @@ const Index = () => {
               <ul className="space-y-4">
                 {['About Us', 'Careers', 'Blog', 'Press'].map((item, i) => (
                   <li key={i}>
-                    <a href="#" className="text-muted-foreground hover:text-brand-orange">
+                    <Link to="#" className="text-muted-foreground hover:text-brand-orange">
                       {item}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -115,13 +118,26 @@ const Index = () => {
             <div>
               <h3 className="text-lg font-semibold mb-6">For Users</h3>
               <ul className="space-y-4">
-                {['How it Works', 'Become a Chef', 'Deliver with Us', 'Order Now'].map((item, i) => (
-                  <li key={i}>
-                    <a href="#" className="text-muted-foreground hover:text-brand-orange">
-                      {item}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <Link to="/discover" className="text-muted-foreground hover:text-brand-orange">
+                    How it Works
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/chef-signup" className="text-muted-foreground hover:text-brand-orange">
+                    Become a Chef
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/driver-signup" className="text-muted-foreground hover:text-brand-orange">
+                    Deliver with Us
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/discover" className="text-muted-foreground hover:text-brand-orange">
+                    Order Now
+                  </Link>
+                </li>
               </ul>
             </div>
             
@@ -130,9 +146,9 @@ const Index = () => {
               <ul className="space-y-4">
                 {['FAQ', 'Contact Us', 'Terms of Service', 'Privacy Policy'].map((item, i) => (
                   <li key={i}>
-                    <a href="#" className="text-muted-foreground hover:text-brand-orange">
+                    <Link to="#" className="text-muted-foreground hover:text-brand-orange">
                       {item}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
