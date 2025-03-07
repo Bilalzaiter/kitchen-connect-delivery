@@ -12,21 +12,29 @@ const DriverSignup = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="pt-24 pb-16">
+      <main className="pt-20">
         {/* Hero Section */}
         <HeroSection />
         
         {/* Benefits Section */}
-        <BenefitsSection />
+        <div className="py-12 md:py-16">
+          <BenefitsSection />
+        </div>
         
         {/* How It Works Section */}
-        <HowItWorksSection />
+        <div className="py-12">
+          <HowItWorksSection />
+        </div>
         
         {/* Earnings Section */}
-        <EarningsSection />
+        <div className="py-12 md:py-16">
+          <EarningsSection />
+        </div>
         
         {/* Application Form */}
-        <ApplicationForm />
+        <div className="py-12 md:py-16">
+          <ApplicationForm />
+        </div>
       </main>
     </div>
   );
