@@ -21,10 +21,10 @@ const HeroSection = () => {
             <p className="text-base sm:text-lg text-gray-600 mb-6 md:mb-8">
               Join our delivery team and help connect talented home chefs with hungry customers in your neighborhood. Flexible hours, competitive pay, and a supportive community.
             </p>
-            <div className="flex flex-wrap gap-3 md:gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
               <Button 
                 size="lg" 
-                className="bg-brand-orange hover:bg-brand-orange/90 text-white text-sm sm:text-base w-full sm:w-auto"
+                className="bg-brand-orange hover:bg-brand-orange/90 text-white text-sm sm:text-base"
                 onClick={() => {
                   const element = document.getElementById("apply-form");
                   element?.scrollIntoView({ behavior: "smooth" });
@@ -35,7 +35,7 @@ const HeroSection = () => {
               <Button 
                 size="lg" 
                 variant="outline"
-                className="text-sm sm:text-base w-full sm:w-auto mt-2 sm:mt-0"
+                className="text-sm sm:text-base mt-2 sm:mt-0"
                 onClick={() => {
                   const element = document.getElementById("earnings");
                   element?.scrollIntoView({ behavior: "smooth" });
@@ -47,15 +47,15 @@ const HeroSection = () => {
             <div className="grid grid-cols-3 gap-4 mt-8 md:mt-10">
               <div className="flex flex-col items-center">
                 <span className="text-xl sm:text-2xl md:text-3xl font-bold text-brand-orange">$18-25</span>
-                <span className="text-xs sm:text-sm text-gray-500 mt-1">Avg. Hourly</span>
+                <span className="text-xs sm:text-sm text-gray-500 mt-1 text-center">Avg. Hourly</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-xl sm:text-2xl md:text-3xl font-bold text-brand-orange">Flexible</span>
-                <span className="text-xs sm:text-sm text-gray-500 mt-1">Work Hours</span>
+                <span className="text-xs sm:text-sm text-gray-500 mt-1 text-center">Work Hours</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-xl sm:text-2xl md:text-3xl font-bold text-brand-orange">Weekly</span>
-                <span className="text-xs sm:text-sm text-gray-500 mt-1">Payments</span>
+                <span className="text-xs sm:text-sm text-gray-500 mt-1 text-center">Payments</span>
               </div>
             </div>
           </motion.div>
