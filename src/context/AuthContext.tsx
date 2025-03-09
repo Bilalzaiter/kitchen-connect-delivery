@@ -121,25 +121,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (signUpError) throw signUpError;
 
-      // Create a profile record
+      // Create a profile record - ensure all required fields have values
       if (data.user) {
+        console.log('Creating profile for user:', data.user.id);
+        console.log('Profile data:', {
+          id: data.user.id,
+          first_name: userData.firstName || '',
+          last_name: userData.lastName || '',
+          role: userData.role || 'customer',
+          address: userData.address || '',
+          phone_number: userData.phone || '',
+          avatar_url: userData.avatarUrl || null
+        });
+        
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
             id: data.user.id,
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            role: 'customer',
-            address: userData.address,
+            first_name: userData.firstName || '',
+            last_name: userData.lastName || '',
+            role: userData.role || 'customer',
+            address: userData.address || '',
             phone_number: userData.phone || '',
             avatar_url: userData.avatarUrl || null
           });
           
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          throw profileError;
+        }
       }
       
       toast.success('Account created successfully!');
     } catch (error: any) {
+      console.error('Signup error:', error);
       toast.error('Error creating account: ' + error.message);
       throw error;
     } finally {

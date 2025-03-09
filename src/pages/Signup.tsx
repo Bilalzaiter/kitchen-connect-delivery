@@ -112,16 +112,17 @@ const Signup = () => {
 
   const onSubmit = async (values: SignupValues) => {
     try {
+      console.log('Submitting signup form with values:', values);
+      
       // First sign up the user to get a user ID
       await signUp(values.email, values.password, {
         firstName: values.firstName,
         lastName: values.lastName,
         address: values.address,
         phone: values.phone,
+        role: 'customer', // Explicitly set the role
         avatarUrl: null, // We'll update this after uploading
       });
-      
-      // User data is now automatically in the context
       
       // Redirect to the home page after successful signup
       navigate('/');
