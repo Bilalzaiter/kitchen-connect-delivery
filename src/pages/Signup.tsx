@@ -1,13 +1,12 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
+import { useAuth } from '@/context/AuthContext';
 import {
   Form,
   FormControl,
@@ -26,6 +25,7 @@ const signupSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
   address: z.string().min(5, { message: 'Please enter your address.' }),
+  phone: z.string().optional(),
   agreeTerms: z.boolean().refine(val => val === true, {
     message: 'You must agree to the terms and conditions.'
   }),
@@ -34,8 +34,9 @@ const signupSchema = z.object({
 type SignupValues = z.infer<typeof signupSchema>;
 
 const Signup = () => {
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { signUp, isLoading } = useAuth();
 
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
@@ -45,21 +46,26 @@ const Signup = () => {
       email: '',
       password: '',
       address: '',
+      phone: '',
       agreeTerms: false,
     },
   });
 
-  const onSubmit = (values: SignupValues) => {
-    // This would connect to your auth service in a real app
-    console.log('Signup form submitted:', values);
-    
-    // Show success message
-    toast.success('Account created successfully!', {
-      description: 'Welcome to KitchenConnect!',
-    });
-    
-    // Redirect to the home page or login
-    setTimeout(() => navigate('/'), 1500);
+  const onSubmit = async (values: SignupValues) => {
+    try {
+      await signUp(values.email, values.password, {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        address: values.address,
+        phone: values.phone || '',
+      });
+      
+      // Redirect to the home page after successful signup
+      navigate('/');
+    } catch (error) {
+      // Error is handled in the auth context
+      console.error('Signup failed', error);
+    }
   };
 
   return (
@@ -185,6 +191,20 @@ const Signup = () => {
                 
                 <FormField
                   control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+1 (555) 123-4567" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
                   name="agreeTerms"
                   render={({ field }) => (
                     <FormItem className="flex items-start space-x-2 space-y-0">
@@ -211,8 +231,8 @@ const Signup = () => {
                   )}
                 />
                 
-                <Button type="submit" className="w-full">
-                  Create Account
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </form>
             </Form>

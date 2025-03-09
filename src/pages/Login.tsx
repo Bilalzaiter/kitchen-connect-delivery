@@ -1,13 +1,12 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
+import { useAuth } from '@/context/AuthContext';
 import {
   Form,
   FormControl,
@@ -29,8 +28,9 @@ const loginSchema = z.object({
 type LoginValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { signIn, isLoading } = useAuth();
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -41,15 +41,15 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (values: LoginValues) => {
-    // This would connect to your auth service in a real app
-    console.log('Login form submitted:', values);
-    
-    // Show success message
-    toast.success('Logged in successfully!');
-    
-    // Redirect to the home page
-    setTimeout(() => navigate('/'), 1000);
+  const onSubmit = async (values: LoginValues) => {
+    try {
+      await signIn(values.email, values.password);
+      // Redirect to the home page after successful login
+      navigate('/');
+    } catch (error) {
+      // Error is handled in the auth context
+      console.error('Login failed', error);
+    }
   };
 
   return (
@@ -154,8 +154,8 @@ const Login = () => {
                   )}
                 />
                 
-                <Button type="submit" className="w-full">
-                  Sign In
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </form>
             </Form>
