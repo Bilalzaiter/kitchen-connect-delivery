@@ -1,16 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Default fallback values for development (never expose actual keys here)
-const defaultSupabaseUrl = 'https://your-project-url.supabase.co';
-const defaultSupabaseAnonKey = 'your-anon-key';
+// Use environment variables or direct values
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://wfoqgylgdqtcolxngvjs.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indmb3FneWxnZHF0Y29seG5ndmpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NTY2NDIsImV4cCI6MjA1NzAzMjY0Mn0.NGljsNFdcNvac2eT2NkNGyiblPEegXomPcfwDrnU_28';
 
-// Use environment variables or fallbacks
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || defaultSupabaseUrl;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || defaultSupabaseAnonKey;
-
-if (supabaseUrl === defaultSupabaseUrl || supabaseAnonKey === defaultSupabaseAnonKey) {
-  console.warn('Using default Supabase credentials. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
-}
-
+// Create and export the Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
