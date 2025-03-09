@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Upload, X } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 import {
   Form,
   FormControl,
@@ -18,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const signupSchema = z.object({
   firstName: z.string().min(2, { message: 'First name must be at least 2 characters.' }),
@@ -25,7 +28,7 @@ const signupSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
   address: z.string().min(5, { message: 'Please enter your address.' }),
-  phone: z.string().optional(),
+  phone: z.string().min(7, { message: 'Please enter a valid phone number.' }),
   agreeTerms: z.boolean().refine(val => val === true, {
     message: 'You must agree to the terms and conditions.'
   }),
@@ -35,6 +38,9 @@ type SignupValues = z.infer<typeof signupSchema>;
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const navigate = useNavigate();
   const { signUp, isLoading } = useAuth();
 
@@ -51,14 +57,71 @@ const Signup = () => {
     },
   });
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      return;
+    }
+    
+    const file = e.target.files[0];
+    setAvatar(file);
+    
+    // Create a preview URL for the image
+    const url = URL.createObjectURL(file);
+    setAvatarUrl(url);
+  };
+
+  const removeAvatar = () => {
+    setAvatar(null);
+    if (avatarUrl) {
+      URL.revokeObjectURL(avatarUrl);
+      setAvatarUrl(null);
+    }
+  };
+
+  const uploadAvatar = async (userId: string) => {
+    if (!avatar) return null;
+    
+    try {
+      setUploadingAvatar(true);
+      
+      // Create a unique file name for the avatar
+      const fileExt = avatar.name.split('.').pop();
+      const fileName = `${userId}/avatar.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+      
+      // Upload the file to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from('profile-images')
+        .upload(filePath, avatar);
+        
+      if (uploadError) throw uploadError;
+      
+      // Get the public URL for the uploaded file
+      const { data } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(filePath);
+        
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      return null;
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const onSubmit = async (values: SignupValues) => {
     try {
+      // First sign up the user to get a user ID
       await signUp(values.email, values.password, {
         firstName: values.firstName,
         lastName: values.lastName,
         address: values.address,
-        phone: values.phone || '',
+        phone: values.phone,
+        avatarUrl: null, // We'll update this after uploading
       });
+      
+      // User data is now automatically in the context
       
       // Redirect to the home page after successful signup
       navigate('/');
@@ -102,6 +165,44 @@ const Signup = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="bg-white rounded-xl border border-border p-6 shadow-sm"
           >
+            {/* Avatar Upload Section */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative mb-3">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={avatarUrl || undefined} />
+                  <AvatarFallback className="bg-brand-orange text-white text-xl">
+                    {form.watch('firstName') && form.watch('lastName')
+                      ? `${form.watch('firstName').charAt(0)}${form.watch('lastName').charAt(0)}`
+                      : 'KC'}
+                  </AvatarFallback>
+                </Avatar>
+                
+                {avatarUrl && (
+                  <button
+                    onClick={removeAvatar}
+                    className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1"
+                    type="button"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              
+              <label htmlFor="avatar-upload" className="cursor-pointer">
+                <div className="flex items-center text-sm text-brand-orange hover:underline">
+                  <Upload size={14} className="mr-1" />
+                  {avatarUrl ? 'Change avatar' : 'Upload avatar'}
+                </div>
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+              </label>
+            </div>
+            
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
@@ -194,7 +295,7 @@ const Signup = () => {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
+                      <FormLabel>Phone Number <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="+1 (555) 123-4567" {...field} />
                       </FormControl>
@@ -231,8 +332,8 @@ const Signup = () => {
                   )}
                 />
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
+                <Button type="submit" className="w-full" disabled={isLoading || uploadingAvatar}>
+                  {isLoading || uploadingAvatar ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </form>
             </Form>

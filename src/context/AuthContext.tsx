@@ -4,13 +4,26 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
+// Extend this interface based on your database schema
+interface UserProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  role: 'admin' | 'chef' | 'customer' | 'driver';
+  address: string;
+  phone_number: string;
+  avatar_url?: string;
+}
+
 type AuthContextType = {
   session: Session | null;
   user: User | null;
+  profile: UserProfile | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, userData: any) => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,13 +31,38 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch user profile data
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setProfile(data as UserProfile);
+    } catch (error: any) {
+      console.error('Error fetching user profile:', error.message);
+    }
+  };
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
+      
       setIsLoading(false);
     });
 
@@ -33,6 +71,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          fetchUserProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+        
         setIsLoading(false);
       }
     );
@@ -86,7 +131,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             last_name: userData.lastName,
             role: 'customer',
             address: userData.address,
-            phone_number: userData.phone || ''
+            phone_number: userData.phone || '',
+            avatar_url: userData.avatarUrl || null
           });
           
         if (profileError) throw profileError;
@@ -95,6 +141,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.success('Account created successfully!');
     } catch (error: any) {
       toast.error('Error creating account: ' + error.message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
+    try {
+      setIsLoading(true);
+      
+      if (!user) throw new Error('No user logged in');
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', user.id);
+        
+      if (error) throw error;
+      
+      // Update local state
+      setProfile(prev => prev ? { ...prev, ...profileData } : null);
+      toast.success('Profile updated successfully!');
+    } catch (error: any) {
+      toast.error('Error updating profile: ' + error.message);
       throw error;
     } finally {
       setIsLoading(false);
@@ -115,7 +185,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      session, 
+      user, 
+      profile, 
+      isLoading, 
+      signIn, 
+      signUp, 
+      signOut,
+      updateProfile 
+    }}>
       {children}
     </AuthContext.Provider>
   );

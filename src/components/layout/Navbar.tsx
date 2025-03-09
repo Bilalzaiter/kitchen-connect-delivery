@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { 
   ChefHat, 
@@ -9,14 +9,28 @@ import {
   MapPin, 
   Menu, 
   X, 
-  User
+  User,
+  LogOut,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, profile, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,6 +67,19 @@ export function Navbar() {
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
     document.body.style.overflow = 'auto';
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (profile) {
+      return `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`;
+    }
+    return 'KC';
   };
 
   return (
@@ -101,12 +128,54 @@ export function Navbar() {
 
         {/* Auth Buttons - Desktop */}
         <div className="hidden md:flex items-center space-x-3">
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/login">Login</Link>
-          </Button>
-          <Button variant="default" size="sm" asChild>
-            <Link to="/signup">Sign Up</Link>
-          </Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar>
+                    <AvatarImage src={profile?.avatar_url} alt={profile?.first_name} />
+                    <AvatarFallback className="bg-brand-orange text-white">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="flex items-center justify-between">
+                  Profile
+                  <Settings className="ml-2 h-4 w-4" />
+                </DropdownMenuItem>
+                {profile?.role === 'chef' && (
+                  <DropdownMenuItem className="flex items-center justify-between">
+                    Chef Dashboard
+                    <ChefHat className="ml-2 h-4 w-4" />
+                  </DropdownMenuItem>
+                )}
+                {profile?.role === 'driver' && (
+                  <DropdownMenuItem className="flex items-center justify-between">
+                    Delivery Dashboard
+                    <Bike className="ml-2 h-4 w-4" />
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive flex items-center justify-between" onClick={handleSignOut}>
+                  Log out
+                  <LogOut className="ml-2 h-4 w-4" />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/login">Login</Link>
+              </Button>
+              <Button variant="default" size="sm" asChild>
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -139,6 +208,21 @@ export function Navbar() {
               <X size={20} />
             </button>
 
+            {user && profile && (
+              <div className="flex items-center space-x-3 px-4 py-4 mb-4 bg-gray-50 rounded-lg">
+                <Avatar>
+                  <AvatarImage src={profile.avatar_url} />
+                  <AvatarFallback className="bg-brand-orange text-white">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{`${profile.first_name} ${profile.last_name}`}</p>
+                  <p className="text-sm text-muted-foreground capitalize">{profile.role}</p>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col space-y-4">
               {currentNavLinks.map((link) => (
                 <Link
@@ -159,15 +243,24 @@ export function Navbar() {
             </div>
 
             <div className="mt-auto space-y-3">
-              <Button variant="outline" className="w-full" asChild>
-                <Link to="/login" onClick={closeMobileMenu}>
-                  <User size={18} className="mr-2" />
-                  Login
-                </Link>
-              </Button>
-              <Button className="w-full" asChild>
-                <Link to="/signup" onClick={closeMobileMenu}>Sign Up</Link>
-              </Button>
+              {user ? (
+                <Button variant="destructive" onClick={handleSignOut} className="w-full">
+                  <LogOut size={18} className="mr-2" />
+                  Log out
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link to="/login" onClick={closeMobileMenu}>
+                      <User size={18} className="mr-2" />
+                      Login
+                    </Link>
+                  </Button>
+                  <Button className="w-full" asChild>
+                    <Link to="/signup" onClick={closeMobileMenu}>Sign Up</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
