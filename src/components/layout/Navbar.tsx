@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -47,13 +46,19 @@ export function Navbar() {
     { name: 'Deliver with us', path: '/driver-signup', icon: Bike },
   ];
 
+  // Add dashboard link for authenticated users
+  const authenticatedNavLinks = user ? [
+    { name: 'Dashboard', path: '/dashboard', icon: Settings },
+    ...navLinks
+  ] : navLinks;
+
   // Check if we're on a driver page to show delivery dashboard link
   const isDriverPage = location.pathname === '/driver-signup' || location.pathname === '/delivery-dashboard';
 
   // If we're on a driver page, add the dashboard link
   const currentNavLinks = isDriverPage ? 
-    [...navLinks, { name: 'Delivery Dashboard', path: '/delivery-dashboard', icon: MapPin }] : 
-    navLinks;
+    [...authenticatedNavLinks, { name: 'Delivery Dashboard', path: '/delivery-dashboard', icon: MapPin }] : 
+    authenticatedNavLinks;
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
@@ -9,7 +8,7 @@ interface UserProfile {
   id: string;
   first_name: string;
   last_name: string;
-  role: 'admin' | 'chef' | 'customer' | 'driver';
+  role: 'admin' | 'moderator' | 'chef' | 'customer' | 'driver';
   address: string;
   phone_number: string;
   avatar_url?: string;
