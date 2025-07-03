@@ -26,13 +26,14 @@ import { useAuth } from '@/context/AuthContext';
 import { hasPermission } from '@/lib/permissions';
 
 export function DashboardSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const { profile } = useAuth();
   const currentPath = location.pathname;
 
   if (!profile) return null;
 
+  const isCollapsed = state === 'collapsed';
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-brand-orange/10 text-brand-orange font-medium" : "hover:bg-muted/50";
@@ -76,7 +77,7 @@ export function DashboardSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink to={item.url} end className={getNavCls}>
                     <item.icon className="mr-2 h-4 w-4" />
-                    {!collapsed && <span>{item.title}</span>}
+                    {!isCollapsed && <span>{item.title}</span>}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -88,10 +89,7 @@ export function DashboardSidebar() {
   };
 
   return (
-    <Sidebar
-      className={collapsed ? "w-14" : "w-60"}
-      collapsible
-    >
+    <Sidebar collapsible="icon">
       <SidebarContent>
         {renderNavItems(mainNavItems, "Main")}
         {renderNavItems(adminNavItems, "Administration")}

@@ -15,7 +15,7 @@ export function DashboardLayout() {
   };
 
   return (
-    <SidebarProvider collapsedWidth={56}>
+    <SidebarProvider>
       <div className="flex min-h-screen w-full">
         {/* Header */}
         <header className="fixed top-0 left-0 right-0 z-40 h-14 flex items-center justify-between border-b bg-background/95 backdrop-blur px-4">
