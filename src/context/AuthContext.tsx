@@ -8,10 +8,10 @@ interface UserProfile {
   id: string;
   first_name: string;
   last_name: string;
-  role: 'admin' | 'moderator' | 'chef' | 'customer' | 'driver';
   address: string;
   phone_number: string;
   avatar_url?: string;
+  roles?: ('admin' | 'moderator' | 'chef' | 'customer' | 'driver')[];
 }
 
 type AuthContextType = {
@@ -36,17 +36,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch user profile data
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error) {
-        throw error;
+      if (profileError) throw profileError;
+
+      // Fetch roles from separate table
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+
+      if (rolesError) {
+        console.error('Error fetching roles:', rolesError);
       }
 
-      setProfile(data as UserProfile);
+      setProfile({
+        ...profileData,
+        roles: rolesData?.map(r => r.role) || ['customer']
+      } as UserProfile);
     } catch (error: any) {
       console.error('Error fetching user profile:', error.message);
     }
@@ -120,26 +132,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (signUpError) throw signUpError;
 
-      // Create a profile record - ensure all required fields have values
+      // Create a profile record - roles are handled by database trigger
       if (data.user) {
-        console.log('Creating profile for user:', data.user.id);
-        console.log('Profile data:', {
-          id: data.user.id,
-          first_name: userData.firstName || '',
-          last_name: userData.lastName || '',
-          role: userData.role || 'customer',
-          address: userData.address || '',
-          phone_number: userData.phone || '',
-          avatar_url: userData.avatarUrl || null
-        });
-        
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
             id: data.user.id,
             first_name: userData.firstName || '',
             last_name: userData.lastName || '',
-            role: userData.role || 'customer',
             address: userData.address || '',
             phone_number: userData.phone || '',
             avatar_url: userData.avatarUrl || null

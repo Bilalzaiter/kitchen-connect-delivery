@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Edit } from 'lucide-react';
+import { getUserPrimaryRole } from '@/lib/permissions';
 
 const DashboardProfile = () => {
   const { profile, updateProfile } = useAuth();
@@ -22,6 +22,9 @@ const DashboardProfile = () => {
   if (!profile) {
     return <div>Loading...</div>;
   }
+
+  const userRoles = profile.roles || ['customer'];
+  const primaryRole = getUserPrimaryRole(userRoles as any);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -100,9 +103,13 @@ const DashboardProfile = () => {
                 <h3 className="text-lg font-semibold">
                   {profile.first_name} {profile.last_name}
                 </h3>
-                <Badge className={`${getRoleBadgeColor(profile.role)} text-white capitalize`}>
-                  {profile.role}
-                </Badge>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {userRoles.map((role) => (
+                    <Badge key={role} className={`${getRoleBadgeColor(role)} text-white capitalize text-xs`}>
+                      {role}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -178,10 +185,21 @@ const DashboardProfile = () => {
             </div>
             
             <div>
-              <Label>Account Role</Label>
+              <Label>Account Roles</Label>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {userRoles.map((role) => (
+                  <Badge key={role} className={`${getRoleBadgeColor(role)} text-white capitalize`}>
+                    {role}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label>Primary Role</Label>
               <div className="mt-1">
-                <Badge className={`${getRoleBadgeColor(profile.role)} text-white capitalize`}>
-                  {profile.role}
+                <Badge className={`${getRoleBadgeColor(primaryRole)} text-white capitalize`}>
+                  {primaryRole}
                 </Badge>
               </div>
             </div>

@@ -1,96 +1,65 @@
-
 export type UserRole = 'admin' | 'moderator' | 'chef' | 'driver' | 'customer';
 
-export interface Permission {
-  canBanUsers: boolean;
-  canEditProfiles: boolean;
-  canDeleteProfiles: boolean;
-  canEditDishes: boolean;
-  canDeleteDishes: boolean;
-  canManageOrders: boolean;
-  canViewAnalytics: boolean;
-  canManageChefs: boolean;
-  canManageDrivers: boolean;
-  canViewAllUsers: boolean;
-  canModerateContent: boolean;
+export type Permission =
+  | 'canViewAllUsers'
+  | 'canEditAnyUser'
+  | 'canDeleteAnyUser'
+  | 'canBanUsers'
+  | 'canModerateContent'
+  | 'canManageChefs'
+  | 'canManageDrivers'
+  | 'canEditOwnProfile'
+  | 'canDeleteOwnAccount';
+
+const rolePermissions: Record<UserRole, Permission[]> = {
+  admin: [
+    'canViewAllUsers',
+    'canEditAnyUser',
+    'canDeleteAnyUser',
+    'canBanUsers',
+    'canModerateContent',
+    'canManageChefs',
+    'canManageDrivers',
+    'canEditOwnProfile',
+    'canDeleteOwnAccount',
+  ],
+  moderator: [
+    'canModerateContent',
+    'canManageChefs',
+    'canManageDrivers',
+    'canEditOwnProfile',
+  ],
+  chef: ['canEditOwnProfile', 'canDeleteOwnAccount'],
+  driver: ['canEditOwnProfile', 'canDeleteOwnAccount'],
+  customer: ['canEditOwnProfile', 'canDeleteOwnAccount'],
+};
+
+export function hasPermission(roles: UserRole | UserRole[], permission: Permission): boolean {
+  const roleArray = Array.isArray(roles) ? roles : [roles];
+  return roleArray.some(role => rolePermissions[role]?.includes(permission) ?? false);
 }
 
-export const getPermissions = (role: UserRole): Permission => {
-  switch (role) {
-    case 'admin':
-      return {
-        canBanUsers: true,
-        canEditProfiles: true,
-        canDeleteProfiles: true,
-        canEditDishes: true,
-        canDeleteDishes: true,
-        canManageOrders: true,
-        canViewAnalytics: true,
-        canManageChefs: true,
-        canManageDrivers: true,
-        canViewAllUsers: true,
-        canModerateContent: true,
-      };
-    case 'moderator':
-      return {
-        canBanUsers: true,
-        canEditProfiles: false,
-        canDeleteProfiles: false,
-        canEditDishes: true,
-        canDeleteDishes: false,
-        canManageOrders: false,
-        canViewAnalytics: true,
-        canManageChefs: false,
-        canManageDrivers: false,
-        canViewAllUsers: true,
-        canModerateContent: true,
-      };
-    case 'chef':
-      return {
-        canBanUsers: false,
-        canEditProfiles: false,
-        canDeleteProfiles: false,
-        canEditDishes: true,
-        canDeleteDishes: true,
-        canManageOrders: true,
-        canViewAnalytics: false,
-        canManageChefs: false,
-        canManageDrivers: false,
-        canViewAllUsers: false,
-        canModerateContent: false,
-      };
-    case 'driver':
-      return {
-        canBanUsers: false,
-        canEditProfiles: false,
-        canDeleteProfiles: false,
-        canEditDishes: false,
-        canDeleteDishes: false,
-        canManageOrders: true,
-        canViewAnalytics: false,
-        canManageChefs: false,
-        canManageDrivers: false,
-        canViewAllUsers: false,
-        canModerateContent: false,
-      };
-    default: // customer
-      return {
-        canBanUsers: false,
-        canEditProfiles: false,
-        canDeleteProfiles: false,
-        canEditDishes: false,
-        canDeleteDishes: false,
-        canManageOrders: false,
-        canViewAnalytics: false,
-        canManageChefs: false,
-        canManageDrivers: false,
-        canViewAllUsers: false,
-        canModerateContent: false,
-      };
-  }
-};
+export function hasAnyPermission(roles: UserRole | UserRole[], permissions: Permission[]): boolean {
+  return permissions.some(permission => hasPermission(roles, permission));
+}
 
-export const hasPermission = (role: UserRole, permission: keyof Permission): boolean => {
-  const permissions = getPermissions(role);
-  return permissions[permission] || false;
-};
+export function hasAllPermissions(roles: UserRole | UserRole[], permissions: Permission[]): boolean {
+  return permissions.every(permission => hasPermission(roles, permission));
+}
+
+export function getUserPrimaryRole(roles: UserRole[]): UserRole {
+  // Priority: admin > moderator > chef > driver > customer
+  if (roles.includes('admin')) return 'admin';
+  if (roles.includes('moderator')) return 'moderator';
+  if (roles.includes('chef')) return 'chef';
+  if (roles.includes('driver')) return 'driver';
+  return 'customer';
+}
+
+export function getAllPermissions(roles: UserRole[]): Permission[] {
+  const allPerms = new Set<Permission>();
+  roles.forEach(role => {
+    rolePermissions[role]?.forEach(perm => allPerms.add(perm));
+  });
+  return Array.from(allPerms);
+}

@@ -38,7 +38,7 @@ export function DashboardSidebar() {
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-brand-orange/10 text-brand-orange font-medium" : "hover:bg-muted/50";
 
-  const userRole = profile.role as 'admin' | 'moderator' | 'chef' | 'driver' | 'customer';
+  const userRoles = profile.roles || ['customer'];
 
   const mainNavItems = [
     { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
@@ -62,7 +62,7 @@ export function DashboardSidebar() {
 
   const renderNavItems = (items: any[], title?: string) => {
     const filteredItems = items.filter(item => 
-      !item.permission || hasPermission(userRole, item.permission as any)
+      !item.permission || hasPermission(userRoles as any, item.permission as any)
     );
 
     if (filteredItems.length === 0) return null;

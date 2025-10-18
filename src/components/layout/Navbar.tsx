@@ -152,13 +152,13 @@ export function Navbar() {
                   Profile
                   <Settings className="ml-2 h-4 w-4" />
                 </DropdownMenuItem>
-                {profile?.role === 'chef' && (
+                {profile?.roles?.includes('chef') && (
                   <DropdownMenuItem className="flex items-center justify-between">
                     Chef Dashboard
                     <ChefHat className="ml-2 h-4 w-4" />
                   </DropdownMenuItem>
                 )}
-                {profile?.role === 'driver' && (
+                {profile?.roles?.includes('driver') && (
                   <DropdownMenuItem className="flex items-center justify-between">
                     Delivery Dashboard
                     <Bike className="ml-2 h-4 w-4" />
@@ -223,7 +223,7 @@ export function Navbar() {
                 </Avatar>
                 <div>
                   <p className="font-medium">{`${profile.first_name} ${profile.last_name}`}</p>
-                  <p className="text-sm text-muted-foreground capitalize">{profile.role}</p>
+                  <p className="text-sm text-muted-foreground capitalize">{profile.roles?.[0] || 'customer'}</p>
                 </div>
               </div>
             )}

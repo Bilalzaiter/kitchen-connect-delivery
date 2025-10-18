@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { getPermissions } from '@/lib/permissions';
+import { getUserPrimaryRole, getAllPermissions } from '@/lib/permissions';
 
 const Dashboard = () => {
   const { profile } = useAuth();
@@ -12,8 +11,9 @@ const Dashboard = () => {
     return <div>Loading...</div>;
   }
 
-  const userRole = profile.role as 'admin' | 'moderator' | 'chef' | 'driver' | 'customer';
-  const permissions = getPermissions(userRole);
+  const userRoles = profile.roles || ['customer'];
+  const primaryRole = getUserPrimaryRole(userRoles as any);
+  const permissions = getAllPermissions(userRoles as any);
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -37,20 +37,22 @@ const Dashboard = () => {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Your Role</CardTitle>
+            <CardTitle className="text-sm font-medium">Your Roles</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center space-x-2">
-              <Badge className={`${getRoleBadgeColor(profile.role)} text-white capitalize`}>
-                {profile.role}
-              </Badge>
+            <div className="flex flex-wrap gap-2">
+              {userRoles.map((role) => (
+                <Badge key={role} className={`${getRoleBadgeColor(role)} text-white capitalize`}>
+                  {role}
+                </Badge>
+              ))}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              {profile.role === 'admin' && 'Full system access'}
-              {profile.role === 'moderator' && 'Content moderation access'}
-              {profile.role === 'chef' && 'Kitchen management access'}
-              {profile.role === 'driver' && 'Delivery management access'}
-              {profile.role === 'customer' && 'Customer portal access'}
+              {primaryRole === 'admin' && 'Full system access'}
+              {primaryRole === 'moderator' && 'Content moderation access'}
+              {primaryRole === 'chef' && 'Kitchen management access'}
+              {primaryRole === 'driver' && 'Delivery management access'}
+              {primaryRole === 'customer' && 'Customer portal access'}
             </p>
           </CardContent>
         </Card>
@@ -61,7 +63,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Object.values(permissions).filter(Boolean).length}
+              {permissions.length}
             </div>
             <p className="text-xs text-muted-foreground">
               Active permissions
@@ -85,7 +87,7 @@ const Dashboard = () => {
       </div>
 
       {/* Permissions Overview */}
-      {(profile.role === 'admin' || profile.role === 'moderator') && (
+      {(userRoles.includes('admin') || userRoles.includes('moderator')) && (
         <Card>
           <CardHeader>
             <CardTitle>Your Permissions</CardTitle>
@@ -95,11 +97,11 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {Object.entries(permissions).map(([key, value]) => (
-                <div key={key} className="flex items-center space-x-2">
-                  <div className={`w-3 h-3 rounded-full ${value ? 'bg-green-500' : 'bg-gray-300'}`} />
-                  <span className={`text-sm ${value ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+              {permissions.map((permission) => (
+                <div key={permission} className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                  <span className="text-sm text-foreground">
+                    {permission.replace(/([A-Z])/g, ' $1').replace(/^can/, '').trim()}
                   </span>
                 </div>
               ))}
