@@ -9,7 +9,8 @@ import {
   Bike, 
   LayoutDashboard, 
   Shield,
-  Ban
+  Ban,
+  MessageSquare
 } from 'lucide-react';
 import {
   Sidebar,
@@ -43,6 +44,7 @@ export function DashboardSidebar() {
   const mainNavItems = [
     { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
     { title: 'Profile', url: '/dashboard/profile', icon: User },
+    { title: 'Messages', url: '/dashboard/messages', icon: MessageSquare },
   ];
 
   const adminNavItems = [

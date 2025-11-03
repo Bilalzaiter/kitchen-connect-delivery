@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import DashboardProfile from "./pages/DashboardProfile";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="profile" element={<DashboardProfile />} />
+                <Route path="messages" element={<Messages />} />
               </Route>
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

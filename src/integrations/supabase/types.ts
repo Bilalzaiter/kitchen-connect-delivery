@@ -51,6 +51,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           id: string
+          metadata: Json | null
           status: Database["public"]["Enums"]["conversation_status"] | null
           title: string
           updated_at: string | null
@@ -59,6 +60,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           id?: string
+          metadata?: Json | null
           status?: Database["public"]["Enums"]["conversation_status"] | null
           title: string
           updated_at?: string | null
@@ -67,6 +69,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           id?: string
+          metadata?: Json | null
           status?: Database["public"]["Enums"]["conversation_status"] | null
           title?: string
           updated_at?: string | null
